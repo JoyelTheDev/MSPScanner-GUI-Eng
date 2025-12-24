@@ -5,12 +5,6 @@
 # *Minecraft Server Ports Scanner GUI*
 
 </div>
-
-Language:
-
-1. [简体中文](../README.md)
-2. [English](README_EN.md)
-
 ---
 
 > [!IMPORTANT]
