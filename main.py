@@ -3,7 +3,8 @@ import sys
 import os
 
 
-def check_con():
+def hide_console():
+    """Hide the console window when -no_console flag is present"""
     if "-no_console" in sys.argv:
         from win32console import GetConsoleWindow
         from win32gui import ShowWindow, SetWindowLong
@@ -14,25 +15,28 @@ def check_con():
                 ShowWindow(hwnd, SW_HIDE)
             SetWindowLong(hwnd, GWL_EXSTYLE, WS_EX_TOOLWINDOW)
         except Exception as e:
-            _ = e
+            # Suppress error silently
+            pass
 
 def main():
-    check_con()
+    hide_console()
     from time import perf_counter
-    all_timer = perf_counter()
+    total_timer = perf_counter()
+    
     from Gui.UserInterface import GUI
 
     gui_timer = perf_counter()
     root = GUI()
-    print(f"GUI初始化时间: {perf_counter() - gui_timer:.3f}秒")
-    print(f"程序启动时间: {perf_counter() - all_timer:.3f}秒")
+    print(f"GUI initialization time: {perf_counter() - gui_timer:.3f} seconds")
+    print(f"Total startup time: {perf_counter() - total_timer:.3f} seconds")
     root.mainloop()
+    
+    # Redirect stderr to suppress error messages
     from io import BytesIO
     sys.stderr = BytesIO()
 
 
 if __name__ == '__main__':
     sys.path.append(".")
-
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     main()
