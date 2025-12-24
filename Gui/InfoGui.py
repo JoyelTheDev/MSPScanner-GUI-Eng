@@ -7,7 +7,7 @@ from Gui.Widgets import *
 
 
 class InfoWindow(Toplevel, Infer):
-    """信息主窗口"""
+    """Main information window"""
 
     def __init__(self, master: Misc, data: ServerInfo):
         from Gui.Widgets import MOTD, Tabs
@@ -21,7 +21,7 @@ class InfoWindow(Toplevel, Infer):
         self.MOTD = MOTD(self)
         self.tab = Tabs(self)
         self.base_info = BaseInfo(self)
-        self.reload_button = Button(self.base_info, text="重新获取信息", command=self.reget_info, style="success")
+        self.reload_button = Button(self.base_info, text="Refresh Info", command=self.reget_info, style="success")
         self.version_info = VersionInfo(self)
 
         if self.data.mod_server:
@@ -41,7 +41,7 @@ class InfoWindow(Toplevel, Infer):
         self.favicon.image = self.favicon.image.resize((128, 128))
         self.favicon.favicon = ImageTk.PhotoImage(self.favicon.image)
         self.favicon.configure(image=self.favicon.favicon)
-        # 将 favicon 引用传递给 self.favicon.image, 使其变成 self.favicon 的属性, 防止其被 gc 回收
+        # Keep favicon reference as self.favicon.image to prevent garbage collection
         self.load_icon(self.favicon.favicon)
 
         self.data = data
@@ -55,18 +55,18 @@ class InfoWindow(Toplevel, Infer):
     def _reget_info(self):
         server_status = Port(self.data.host, self.data.port).get_server_info()
         if server_status["status"] == "offline":
-            showinfo("服务器已经死了，都是你害的辣 (doge", "服务器已离线", parent=self)
+            showinfo("Server is dead, it's all your fault (doge", "Server is offline", parent=self)
         elif server_status["status"] == "error":
-            showinfo("服务器有点问题：" + server_status["msg"], "服务器：?", parent=self)
+            showinfo("Server has some issues: " + server_status["msg"], "Server: ?", parent=self)
         elif server_status["status"] == "online":
             self.load_data(ServerInfo(server_status["info"]))
 
     def load_icon(self, favicon: PhotoImage):
         """
-        将一个 PIL.ImageTK.PhotoImage 加载为 GUI 图标
+        Load a PIL.ImageTK.PhotoImage as GUI icon
 
         Args:
-            favicon: 一个 PIL.ImageTK.PhotoImage 实例化对象
+            favicon: A PIL.ImageTK.PhotoImage instance
         """
         self.iconphoto(False, favicon)
 
@@ -76,11 +76,11 @@ class InfoWindow(Toplevel, Infer):
         self.MOTD.pack_configure(fill=X)
 
         self.tab.pack(fill=BOTH, expand=True)
-        self.tab.add(self.base_info, text="基本信息")
+        self.tab.add(self.base_info, text="Basic Info")
         self.reload_button.pack_configure(pady=5)
-        self.tab.add(self.version_info, text="版本信息")
+        self.tab.add(self.version_info, text="Version Info")
         if self.data.mod_server:
-            self.tab.add(self.mod_info, text="模组信息")
+            self.tab.add(self.mod_info, text="Mod Info")
 
     def load_window_title(self):
         text = ""
@@ -91,7 +91,7 @@ class InfoWindow(Toplevel, Infer):
 
 # noinspection PyTypeChecker
 class PlayersInfo(Frame, Infer):
-    """玩家信息组件"""
+    """Player information component"""
 
     def __init__(self, master: Misc):
         super(PlayersInfo, self).__init__(master)
@@ -100,7 +100,7 @@ class PlayersInfo(Frame, Infer):
         self.motion_id = None
         self.text = Label(self, anchor=CENTER)
         self.player_list = Listbox(self, width=15)
-        self.tip = ToolTip(self.player_list, "在这个服务器里我们找不到人 :-(", delay=0, alpha=0.8)
+        self.tip = ToolTip(self.player_list, "We can't find anyone on this server :-(", delay=0, alpha=0.8)
         self.text.pack(side=TOP, fill=X)
         self.player_list.pack(side=LEFT, fill=BOTH, expand=True)
         self.data = None
@@ -110,7 +110,7 @@ class PlayersInfo(Frame, Infer):
     def load_data(self, data: ServerInfo):
         self.data = data
 
-        self.text.configure(text=f"人数：{data.player_online}/{data.player_max}")
+        self.text.configure(text=f"Players: {data.player_online}/{data.player_max}")
         if not config.accumulation_player:
             self.players.clear()
         for player in data.players:
@@ -161,13 +161,13 @@ class PlayersInfo(Frame, Infer):
         player = list(self.players.values())[item]
 
         menu = Menu(self.player_list, tearoff=0)
-        menu.add_command(label="复制名称", command=lambda: copy_clipboard(player["name"]))
-        menu.add_command(label="复制UUID", command=lambda: copy_clipboard(player["id"]))
+        menu.add_command(label="Copy Name", command=lambda: copy_clipboard(player["name"]))
+        menu.add_command(label="Copy UUID", command=lambda: copy_clipboard(player["id"]))
         menu.post(event.x_root, event.y_root)
 
 
 class BaseInfo(Frame, Infer):
-    """服务器基本信息组件"""
+    """Server basic information component"""
 
     def __init__(self, master: Misc):
         super(BaseInfo, self).__init__(master)
@@ -177,20 +177,20 @@ class BaseInfo(Frame, Infer):
         self.host = Label(self, anchor=CENTER)
         self.ping = Label(self, anchor=CENTER)
         self.version = Label(self, anchor=CENTER)
-        self.host_copy_b = Button(self, text="复制地址")
+        self.host_copy_b = Button(self, text="Copy Address")
 
         self.pack_widgets()
         if debug:
-            self.print_data = Button(self, text="打印数据", command=lambda: print(self.data.parsed_data))
+            self.print_data = Button(self, text="Print Data", command=lambda: print(self.data.parsed_data))
             self.print_data.pack(pady=5)
 
     def load_data(self, data: ServerInfo):
         self.data = data
 
         self.player_list.load_data(data)
-        self.host.configure(text=f"地址：{data.host}:{data.port}")
-        self.ping.configure(text=f"延迟：{data.ping}ms")
-        self.version.configure(text=f"版本：{data.version_name}")
+        self.host.configure(text=f"Address: {data.host}:{data.port}")
+        self.ping.configure(text=f"Ping: {data.ping}ms")
+        self.version.configure(text=f"Version: {data.version_name}")
         self.host_copy_b.configure(command=lambda: copy_clipboard(f"{data.host}:{data.port}"))
 
     def pack_widgets(self):
@@ -202,7 +202,7 @@ class BaseInfo(Frame, Infer):
 
 
 class VersionInfo(Frame, Infer):
-    """版本信息组件"""
+    """Version information component"""
 
     def __init__(self, master: Misc):
         from Gui.Widgets import MOTD
@@ -223,12 +223,12 @@ class VersionInfo(Frame, Infer):
         self.pack_widgets()
 
     def bind_tip(self):
-        tips = [(self.version_name_label, "服务器版本名 (服务器返回结果)\n部分服务器会修改此部分"),
-                (self.version_name_text, "服务器版本名 (服务器返回结果)\n部分服务器会修改此部分"),
-                (self.minecraft_version, "服务器版本名 (就是大家平时的叫法)"),
-                (self.protocol_version, "服务器协议版本号 (几乎每个MC版本都有不同版本的协议版本号)"),
-                (self.major_name, "大版本 (该服务器是属于哪个大版本的)"),
-                (self.version_type, "服务器版本的类型")]
+        tips = [(self.version_name_label, "Server version name (server response)\nSome servers modify this part"),
+                (self.version_name_text, "Server version name (server response)\nSome servers modify this part"),
+                (self.minecraft_version, "Server version name (common naming convention)"),
+                (self.protocol_version, "Server protocol version (almost every MC version has different protocol version)"),
+                (self.major_name, "Major version (which major version this server belongs to)"),
+                (self.version_type, "Server version type")]
         for tip in tips:
             ToolTip(tip[0], tip[1], delay=0, alpha=0.8)
 
@@ -250,24 +250,24 @@ class VersionInfo(Frame, Infer):
             description_json = DescriptionParser.format_chars_to_extras(data.version_name)
         else:
             description_json = [{"text": data.version_name}]
-        self.version_name_label.configure(text="版本名：")
+        self.version_name_label.configure(text="Version Name: ")
         if self.version_name_label_show:
-            self.version_name_label.configure(text=f"版本名：{data.version_name}")
+            self.version_name_label.configure(text=f"Version Name: {data.version_name}")
         self.version_name_text.load_motd(description_json)
-        self.minecraft_version.configure(text=f"正式版本名：{data.protocol_name}")
-        self.protocol_version.configure(text=f"协议版本号：{data.protocol_version}")
-        self.major_name.configure(text=f"大版本：{data.protocol_major_name}")
+        self.minecraft_version.configure(text=f"Official Version: {data.protocol_name}")
+        self.protocol_version.configure(text=f"Protocol Version: {data.protocol_version}")
+        self.major_name.configure(text=f"Major Version: {data.protocol_major_name}")
 
         if data.version_type == "release":
-            self.version_type.configure(text="版本类型：正式版")
+            self.version_type.configure(text="Version Type: Release")
         elif data.version_type == "snapshot":
-            self.version_type.configure(text=f"版本类型：快照版")
+            self.version_type.configure(text=f"Version Type: Snapshot")
         else:
-            self.version_type.configure(text=f"版本类型(未检测)：{data.version_type}")
+            self.version_type.configure(text=f"Version Type (undetected): {data.version_type}")
 
 
 class ModInfo(Frame, Infer):
-    """模组信息组件"""
+    """Mod information component"""
 
     def __init__(self, master: Misc):
         super(ModInfo, self).__init__(master)
@@ -280,8 +280,8 @@ class ModInfo(Frame, Infer):
         self.pack_widgets()
 
     def pack_widgets(self):
-        self.mod_list.heading("mod", text="模组名")
-        self.mod_list.heading("version", text="版本")
+        self.mod_list.heading("mod", text="Mod Name")
+        self.mod_list.heading("version", text="Version")
         self.mod_list.bind("<Button-1>", self.select_mod)
 
         self.mod_pack_info.pack_configure(fill=X)
@@ -294,7 +294,7 @@ class ModInfo(Frame, Infer):
         self.mod_list.delete(*self.mod_list.get_children())
         for mod in data.mod_list.items():
             if "OHNOES" in mod[1]:
-                mod = (mod[0], "未知")  # 已修复在加载旧扫描记录时的鬼脸小人
+                mod = (mod[0], "Unknown")  # Fixed the "OHNOES" face issue when loading old scan records
             self.mod_list.insert("", END, values=mod)
 
     def select_mod(self, event: Event):
