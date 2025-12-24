@@ -31,7 +31,7 @@ class PortsHotView(Frame):
 
     def callback(self, port: int) -> None:
         """
-        把此端口存在服务器记录到热力图上
+        Record this port's server existence on the heatmap
         :return: None
         """
         with self.record_process_lock:
@@ -40,7 +40,7 @@ class PortsHotView(Frame):
 
     def draw(self, event=None) -> None:
         """
-        绘制热力图
+        Draw the heatmap
         :return: None
         """
         if not event:
@@ -73,8 +73,8 @@ class PortsHotView(Frame):
 
         with self.record_process_lock:
             message = \
-                f"端口范围: {index * group_size}-{(index + 1) * group_size}\n" \
-                f"服务器数量: {self.resized[index]}\n"
+                f"Port range: {index * group_size}-{(index + 1) * group_size}\n" \
+                f"Server count: {self.resized[index]}\n"
         tip_label_widget: Label = self.ports_tip.toplevel.winfo_children()[0]
         tip_label_widget.configure(text=message)
 
